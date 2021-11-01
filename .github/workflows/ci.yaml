@@ -1,0 +1,14 @@
+name: CI
+
+on: push
+
+jobs: 
+  test:
+    runs-on: macos-11
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: run snapshot tests
+        run: swift test
