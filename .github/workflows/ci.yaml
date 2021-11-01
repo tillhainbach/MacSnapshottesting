@@ -12,3 +12,11 @@ jobs:
 
       - name: run snapshot tests
         run: swift test
+        env:
+          SNAPSHOT_ARTIFACTS: "./.temp/artifacts"
+
+      - name: Archive failing snapshots
+        uses: actions/upload-artifact@v2
+        with:
+          name: failing-snapshots
+          path: ./.temp/artifacts/*.png
