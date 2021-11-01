@@ -16,6 +16,7 @@ jobs:
           SNAPSHOT_ARTIFACTS: "./.temp/artifacts"
 
       - name: Archive failing snapshots
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: failing-snapshots
