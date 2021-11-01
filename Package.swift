@@ -24,6 +24,8 @@ let package = Package(
       dependencies: []),
     .testTarget(
       name: "MacSnapshottestingTests",
-      dependencies: ["MacSnapshottesting", "SnapshotTesting"]),
+      dependencies: ["MacSnapshottesting", "SnapshotTesting"],
+      exclude: ["__Snapshots__"]
+    )
   ]
 )
