@@ -10,10 +10,32 @@ final class MacSnapshottestingTests: XCTestCase {
 
   func testExample() throws {
     let view = MacSnapshottesting()
-//    isRecording = false
+//    isRecording = true
     assertSnapshot(matching: view, as: .image)
 
   }
+
+//  func testSameData() throws {
+//    let ci = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ci.png")!
+//    let ref = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ref.png")!
+//
+//    let ciData = try Data(contentsOf: ci)
+//    let refData = try Data(contentsOf: ref)
+//
+//    XCTAssertEqual(ciData, refData)
+//  }
+//
+//  func testBitPerComponent() throws {
+//    let ci = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ci.png")!
+//    let ref = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ref.png")!
+//
+//    let ciImage = NSImage(contentsOf: ci)!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+//    let refImage = NSImage(contentsOf: ref)!.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+//
+//    XCTAssertEqual(ciImage.bitsPerComponent, refImage.bitsPerComponent)
+//    XCTAssertEqual(ciImage.bitsPerPixel, refImage.bitsPerPixel)
+//    XCTAssertEqual(ciImage, refImage)
+//  }
 }
 
 extension Snapshotting where Value: View, Format == NSImage {
@@ -22,11 +44,15 @@ extension Snapshotting where Value: View, Format == NSImage {
     return SimplySnapshotting.image(precision: 1).asyncPullback { swiftUIView in
       let controller = NSHostingController(rootView: swiftUIView)
       let view = controller.view
-      let size = NSSize(width: 500, height: 300)
+      let size = controller.sizeThatFits(in: .zero)
       view.frame.size = size
 
       return Async { callback in
-        let image =  NSImage(data: view.dataWithPDF(inside: view.bounds))!
+        let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
+        view.cacheDisplay(in: view.bounds, to: bitmapRep)
+        let image =  NSImage(size: view.bounds.size)
+        image.addRepresentation(bitmapRep)
+
         let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
         let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
         let ciImage = CIImage(cgImage: cgImage).matchedFromWorkingSpace(to: genericRGBColorSpace)!
@@ -35,6 +61,10 @@ extension Snapshotting where Value: View, Format == NSImage {
         resizeFilter.inputImage = ciImage
         let ouputImage = resizeFilter.outputImage!
         let context = CIContext(options: nil)
+//          options: [
+//            CIContextOption.workingFormat: CIFormat.RGB
+//          ]
+//        )
         let newCGImage = context.createCGImage(ouputImage, from: ouputImage.extent)!
         let genericImage = NSImage(
           cgImage: newCGImage,
