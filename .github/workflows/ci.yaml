@@ -10,6 +10,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
+      - name: Get current display mode
+        run: swift displayMode.swift
+
       - name: run snapshot tests
         run: swift test
         env:

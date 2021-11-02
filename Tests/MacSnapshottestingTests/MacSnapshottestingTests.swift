@@ -44,16 +44,18 @@ extension Snapshotting where Value: View, Format == NSImage {
     return SimplySnapshotting.image(precision: 1).asyncPullback { swiftUIView in
       let controller = NSHostingController(rootView: swiftUIView)
       let view = controller.view
-//      let size = controller.sizeThatFits(in: .zero)
-      let size = NSSize(width: 500, height: 300)
+      let size = controller.sizeThatFits(in: .zero)
+//      let size = NSSize(width: 500, height: 300)
       view.frame.size = size
       view.appearance = NSAppearance(named: .aqua)
+      let display = CGDirectDisplayID()
+      let current = CGDisplayCopyDisplayMode(display)
 
 
       return Async { callback in
         let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
-        view.cacheDisplay(in: view.bounds, to: bitmapRep)
-        let image =  NSImage(size: view.bounds.size)
+        view.cacheDisplay(in: view.frame, to: bitmapRep)
+        let image =  NSImage(size: size)
         image.addRepresentation(bitmapRep)
 
         let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
