@@ -15,6 +15,12 @@ final class MacSnapshottestingTests: XCTestCase {
 
   }
 
+//  func testSnapshotWindow() {
+//    let view = MacSnapshottesting()
+////    isRecording = true
+//    assertSnapshot(matching: view, as: .windowImage())
+//  }
+
 //  func testSameData() throws {
 //    let ci = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ci.png")!
 //    let ref = URL(string: "file:///Users/tillhainbach/GitHub/_temp/MacSnapshottesting/ref.png")!
@@ -41,23 +47,40 @@ final class MacSnapshottestingTests: XCTestCase {
 extension Snapshotting where Value: View, Format == NSImage {
 
   public static var image: Self {
-    return SimplySnapshotting.image(precision: 1).asyncPullback { swiftUIView in
-      let controller = NSHostingController(rootView: swiftUIView)
+    Snapshotting<NSView, NSImage>.image(
+      precision: 1,
+      size: nil,
+      appearance: .init(named: .aqua),
+      windowForDrawing: .newWindow(backingScaleFactor: 1)
+    ).pullback { view in
+      let controller = NSHostingController(rootView: view)
       let view = controller.view
-      let size = controller.sizeThatFits(in: .zero)
-//      let size = NSSize(width: 500, height: 300)
-      view.frame.size = size
-      view.appearance = NSAppearance(named: .aqua)
-//      let display = CGDirectDisplayID()
-//      let current = CGDisplayCopyDisplayMode(display)
+      view.frame.size = controller.sizeThatFits(in: .zero)
+      return view
+    }
+  }
 
 
-      return Async { callback in
-        let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
-        view.cacheDisplay(in: view.frame, to: bitmapRep)
-        let image =  NSImage(size: size)
-        image.addRepresentation(bitmapRep)
-        callback(image)
+//  public static var image: Self {
+//    return SimplySnapshotting.image(precision: 1).asyncPullback { swiftUIView in
+//      let controller = NSHostingController(rootView: swiftUIView)
+//      let view = controller.view
+//      let size = controller.sizeThatFits(in: .zero)
+////      let size = NSSize(width: 500, height: 300)
+//      view.frame.size = size
+//      view.appearance = NSAppearance(named: .aqua)
+//
+////      let window = ScaledWindow(backingScaleFactor: 1, contentViewController: controller)
+////      let display = CGDirectDisplayID()
+////      let current = CGDisplayCopyDisplayMode(display)
+//
+//
+//      return Async { callback in
+//        let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
+//        view.cacheDisplay(in: view.frame, to: bitmapRep)
+//        let image =  NSImage(size: size)
+//        image.addRepresentation(bitmapRep)
+//        callback(image)
 
 //        let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
 //        let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
@@ -79,17 +102,23 @@ extension Snapshotting where Value: View, Format == NSImage {
 
 //        callback(genericImage)
 
-      }
+//      }
 
-    }
-  }
+//    }
+//  }
 
-  public static func image(precision: Float = 1, size: CGSize? = nil) -> Snapshotting {
+  public static func windowImage(precision: Float = 1, size: CGSize? = nil) -> Snapshotting {
     return SimplySnapshotting.image(precision: precision).asyncPullback { swiftUIView in
-      let controller = NSHostingController(rootView: swiftUIView)
+      let controller = NSHostingController(rootView: swiftUIView.preferredColorScheme(.light))
+      controller.view.frame.size = controller.sizeThatFits(in: .zero)
+      controller.view.appearance = NSAppearance(named: .aqua)
+
+//      let window = ScaledWindow.init(backingScaleFactor: 1, viewToSnapshot: controller.view)
       let window = NSWindow(contentViewController: controller)
       window.backgroundColor = .windowBackgroundColor
       window.colorSpace = .genericRGB
+
+//      window.appearance = .init(named: .aqua)
       let windowController = NSWindowController(window: window)
 
       return Async { callback in
@@ -105,11 +134,13 @@ extension Snapshotting where Value: View, Format == NSImage {
   static private func takeSnapshot(from windowController: NSWindowController) -> NSImage? {
     guard let window = windowController.window else { return nil }
 
-    var image = CGWindowListCreateImage(
+    let image = CGWindowListCreateImage(
       .null,
-      .optionIncludingWindow, CGWindowID(window.windowNumber), [.shouldBeOpaque, .boundsIgnoreFraming])!
-    let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
-    image = image.copy(colorSpace: genericRGBColorSpace)!
+      .optionIncludingWindow, CGWindowID(window.windowNumber),
+      [.shouldBeOpaque, .boundsIgnoreFraming]
+    )!
+//    let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
+//    image = image.copy(colorSpace: genericRGBColorSpace)!
 
     return NSImage(cgImage: image, size: .init(width: image.width, height: image.height))
 
