@@ -48,8 +48,8 @@ extension Snapshotting where Value: View, Format == NSImage {
 //      let size = NSSize(width: 500, height: 300)
       view.frame.size = size
       view.appearance = NSAppearance(named: .aqua)
-      let display = CGDirectDisplayID()
-      let current = CGDisplayCopyDisplayMode(display)
+//      let display = CGDirectDisplayID()
+//      let current = CGDisplayCopyDisplayMode(display)
 
 
       return Async { callback in
@@ -57,26 +57,27 @@ extension Snapshotting where Value: View, Format == NSImage {
         view.cacheDisplay(in: view.frame, to: bitmapRep)
         let image =  NSImage(size: size)
         image.addRepresentation(bitmapRep)
+        callback(image)
 
-        let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
-        let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
-        let ciImage = CIImage(cgImage: cgImage).matchedFromWorkingSpace(to: genericRGBColorSpace)!
-        let resizeFilter = CIFilter.bicubicScaleTransform()
-        resizeFilter.scale = Float(size.width / ciImage.extent.width)
-        resizeFilter.inputImage = ciImage
-        let ouputImage = resizeFilter.outputImage!
-        let context = CIContext(options: nil)
-//          options: [
-//            CIContextOption.workingFormat: CIFormat.RGB
-//          ]
+//        let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+//        let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
+//        let ciImage = CIImage(cgImage: cgImage).matchedFromWorkingSpace(to: genericRGBColorSpace)!
+//        let resizeFilter = CIFilter.bicubicScaleTransform()
+//        resizeFilter.scale = Float(size.width / ciImage.extent.width)
+//        resizeFilter.inputImage = ciImage
+//        let ouputImage = resizeFilter.outputImage!
+//        let context = CIContext(options: nil)
+////          options: [
+////            CIContextOption.workingFormat: CIFormat.RGB
+////          ]
+////        )
+//        let newCGImage = context.createCGImage(ouputImage, from: ouputImage.extent)!
+//        let genericImage = NSImage(
+//          cgImage: newCGImage,
+//          size: .init(width: newCGImage.width, height: newCGImage.height)
 //        )
-        let newCGImage = context.createCGImage(ouputImage, from: ouputImage.extent)!
-        let genericImage = NSImage(
-          cgImage: newCGImage,
-          size: .init(width: newCGImage.width, height: newCGImage.height)
-        )
 
-        callback(genericImage)
+//        callback(genericImage)
 
       }
 
