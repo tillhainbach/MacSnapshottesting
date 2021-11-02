@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get current display mode
-        run: swift displayMode.swift
+        run: ./displayMode
 
       - name: run snapshot tests
         run: swift test
