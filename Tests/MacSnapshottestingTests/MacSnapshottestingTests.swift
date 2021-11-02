@@ -44,8 +44,11 @@ extension Snapshotting where Value: View, Format == NSImage {
     return SimplySnapshotting.image(precision: 1).asyncPullback { swiftUIView in
       let controller = NSHostingController(rootView: swiftUIView)
       let view = controller.view
-      let size = controller.sizeThatFits(in: .zero)
+//      let size = controller.sizeThatFits(in: .zero)
+      let size = NSSize(width: 500, height: 300)
       view.frame.size = size
+      view.appearance = NSAppearance(named: .aqua)
+
 
       return Async { callback in
         let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
@@ -56,7 +59,7 @@ extension Snapshotting where Value: View, Format == NSImage {
         let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
         let genericRGBColorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear)!
         let ciImage = CIImage(cgImage: cgImage).matchedFromWorkingSpace(to: genericRGBColorSpace)!
-        let resizeFilter = CIFilter.lanczosScaleTransform()
+        let resizeFilter = CIFilter.bicubicScaleTransform()
         resizeFilter.scale = Float(size.width / ciImage.extent.width)
         resizeFilter.inputImage = ciImage
         let ouputImage = resizeFilter.outputImage!
